@@ -1,0 +1,420 @@
+{
+  "info": {
+    "_postman_id": "3f977d44-76b2-4e57-b1ea-d0c040ff49eb",
+    "name": "CSCI3916_HW3",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "51837659",
+    "_collection_link": "https://go.postman.co/collection/51837659-3f977d44-76b2-4e57-b1ea-d0c040ff49eb?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "POST /signup",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Signup successful\", function () {\r",
+              "    pm.response.to.have.status(201);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "const random = Math.floor(Math.random() * 10000);\r",
+              "pm.environment.set(\"username\", \"user\" + random);\r",
+              "pm.environment.set(\"password\", \"pass123\");"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"username\": \"{{username}}\",\r\n  \"password\": \"{{password}}\",\r\n  \"name\": \"Test User\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://csc3916-assignment3-eoiw.onrender.com/signup",
+          "protocol": "https",
+          "host": [
+            "csc3916-assignment3-eoiw",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "signup"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /signup (FAIL) user already exists",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Duplicate user rejected\", function () {\r",
+              "    pm.response.to.have.status(409);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"username\": \"testuser\",\r\n  \"password\": \"123456\",\r\n  \"name\": \"Nico\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://csc3916-assignment3-eoiw.onrender.com/signup",
+          "protocol": "https",
+          "host": [
+            "csc3916-assignment3-eoiw",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "signup"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /signin",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Signin successful\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "var data = JSON.parse(responseBody);\r",
+              "postman.setEnvironmentVariable(\"token\", data.token);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"username\": \"testuser\",\r\n  \"password\": \"123456\",\r\n  \"name\": \"Nico\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://csc3916-assignment3-eoiw.onrender.com/signin",
+          "protocol": "https",
+          "host": [
+            "csc3916-assignment3-eoiw",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "signin"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "ADD /movie",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Movie created\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "pm.test(\"Duplicate movie rejected\", function () {\r",
+              "    pm.response.to.have.status(409);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"title\": \"Rango\",\r\n  \"releaseDate\": 2011,\r\n  \"genre\": \"Western\",\r\n  \"actors\": [\r\n    { \"actorName\": \"Johnny Depp\", \"characterName\": \"Rango\" },\r\n    { \"actorName\": \"Abigail Breslin\", \"characterName\": \"Priscilla\" },\r\n    { \"actorName\": \"Alfred Molina\", \"characterName\": \"Roadkill\" },\r\n    { \"actorName\": \"Bill Nighy\", \"characterName\": \"Rattlesnake Jake\" }\r\n  ]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://csc3916-assignment3-eoiw.onrender.com/movies",
+          "protocol": "https",
+          "host": [
+            "csc3916-assignment3-eoiw",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "movies"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET /movie",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Get movies works\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "https://csc3916-assignment3-eoiw.onrender.com/movies",
+          "protocol": "https",
+          "host": [
+            "csc3916-assignment3-eoiw",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "movies"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "PUT /movie",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Movie updated\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"title\": \"Inception\",\r\n  \"releaseDate\": 2010,\r\n  \"genre\": \"Science Fiction\",\r\n  \"actors\": [\r\n    { \"actorName\": \"Leonardo DiCaprio\", \"characterName\": \"Cobb\" },\r\n    { \"actorName\": \"Joseph Gordon-Levitt\", \"characterName\": \"Arthur\" },\r\n    { \"actorName\": \"Elliot Page\", \"characterName\": \"Ariadne\" },\r\n    { \"actorName\": \"Tom Hardy\", \"characterName\": \"Eames\" }\r\n  ]\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://csc3916-assignment3-eoiw.onrender.com/movies/:title",
+          "protocol": "https",
+          "host": [
+            "csc3916-assignment3-eoiw",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "movies",
+            ":title"
+          ],
+          "variable": [
+            {
+              "key": "title",
+              "value": "Rango"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "DELETE /movie",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Movie deleted\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "pm.test(\"Delete non-existent movie fails\", function () {\r",
+              "    pm.response.to.have.status(404);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"genre\": \"Comedy\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://csc3916-assignment3-eoiw.onrender.com/movies/:title",
+          "protocol": "https",
+          "host": [
+            "csc3916-assignment3-eoiw",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "movies",
+            ":title"
+          ],
+          "variable": [
+            {
+              "key": "title",
+              "value": "Test Movie"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "ADD /movie missing required fields",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Missing fields rejected\", function () {\r",
+              "    pm.response.to.have.status(400);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "{{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"title\": \"The Silence of the Lambs\",\r\n  \"releaseDate\": 1991,\r\n  \"genre\": \"Horror\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://csc3916-assignment3-eoiw.onrender.com/movies",
+          "protocol": "https",
+          "host": [
+            "csc3916-assignment3-eoiw",
+            "onrender",
+            "com"
+          ],
+          "path": [
+            "movies"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
