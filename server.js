@@ -152,16 +152,15 @@ router.get('/movies/:id([0-9a-fA-F]{24})', authJwtController.isAuthenticated, as
 });
 
 router.post('/movies/search', authJwtController.isAuthenticated, async (req, res) => {
-  const search = query ? query : '';
+  const { query } = req.body;
 
   try {
     const aggregate = [
       {
         $match: {
           $or: [
-            { title: { $regex: search, $options: 'i' } },
-            { 'actors.actorName': { $regex: search, $options: 'i' } },
-            { genre: search }
+            { title: { $regex: query, $options: 'i' } },
+            { 'actors.actorName': { $regex: query, $options: 'i' } }
           ]
         }
       },
@@ -182,7 +181,6 @@ router.post('/movies/search', authJwtController.isAuthenticated, async (req, res
 
     const movies = await Movie.aggregate(aggregate);
     res.json(movies);
-    
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: err.message });
