@@ -6,7 +6,6 @@ const passport = require('passport');
 const authJwtController = require('./auth_jwt');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
-const mongoose = require('mongoose');
 const User = require('./Users');
 const Movie = require('./Movies');
 const Review = require('./Reviews');
