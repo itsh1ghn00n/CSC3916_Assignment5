@@ -83,7 +83,7 @@ router.route('/movies')
             },
             {
               $addFields: {
-                avgRating: { $avg: '$movieReviews.rating' }
+                avgRating: { $round: [{ $avg: '$movieReviews.rating' }, 1] }
               }
             },
             {
@@ -135,7 +135,7 @@ router.get('/movies/:id([0-9a-fA-F]{24})', authJwtController.isAuthenticated, as
       },
       {
         $addFields: {
-          avgRating: { $avg: '$movieReviews.rating' }
+          avgRating: { $round: [{ $avg: '$movieReviews.rating' }, 1] }
         }
       }
     ];
