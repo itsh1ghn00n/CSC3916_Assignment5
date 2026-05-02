@@ -9,6 +9,7 @@ const cors = require('cors');
 const User = require('./Users');
 const Movie = require('./Movies');
 const Review = require('./Reviews');
+const mongoose = require('mongoose');
 
 const app = express();
 app.use(cors());
@@ -234,6 +235,30 @@ router.put('/movies/:title', authJwtController.isAuthenticated, async (req, res)
     );
     res.json(updated);
   } catch (err) {
+    res.status(500).json({ success: false });
+  }
+});
+
+router.put('/movies/:id', authJwtController.isAuthenticated, async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: 'Invalid movie ID' });
+    }
+
+    const updated = await Movie.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ message: 'Movie not found' });
+    }
+
+    res.json(updated);
+
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ success: false });
   }
 });
