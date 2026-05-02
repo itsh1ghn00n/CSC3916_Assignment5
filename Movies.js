@@ -27,6 +27,7 @@ var MovieSchema = new Schema({
     actorName: String,
     characterName: String,
   }],
+  imageUrl: String,
 });
 
 

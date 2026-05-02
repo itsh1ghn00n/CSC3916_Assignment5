@@ -1,0 +1,16 @@
+{
+	"id": "fe65749e-9ffc-485a-a298-84cd4aba419f",
+	"name": "Environment",
+	"values": [
+		{
+			"key": "token",
+			"value": "",
+			"type": "default",
+			"enabled": true
+		}
+	],
+	"color": 120,
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2026-04-18T06:31:04.672Z",
+	"_postman_exported_using": "Postman/12.5.4"
+}

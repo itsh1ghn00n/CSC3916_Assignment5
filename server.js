@@ -6,9 +6,10 @@ const passport = require('passport');
 const authJwtController = require('./auth_jwt');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
+const mongoose = require('mongoose');
 const User = require('./Users');
 const Movie = require('./Movies');
-const Review = require('./Review');
+const Review = require('./Reviews');
 
 const app = express();
 app.use(cors());
@@ -18,8 +19,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(passport.initialize());
 
 const router = express.Router();
-
-// Removed getJSONObjectForMovieRequirement as it's not used
 
 router.post('/signup', async (req, res) => { // Use async/await
   if (!req.body.username || !req.body.password) {
@@ -73,7 +72,26 @@ router.post('/signin', async (req, res) => { // Use async/await
 router.route('/movies')
     .get(authJwtController.isAuthenticated, async (req, res) => {
       try {
-          const movies = await Movie.find();
+          const aggregate = [
+            {
+              $lookup: {
+                from: 'reviews',
+                localField: '_id',
+                foreignField: 'movieId',
+                as: 'movieReviews'
+              }
+            },
+            {
+              $addFields: {
+                avgRating: { $avg: '$movieReviews.rating' }
+              }
+            },
+            {
+              $sort: { avgRating: -1 }
+            }
+          ];
+
+          const movies = await Movie.aggregate(aggregate);
           res.json(movies);
       } catch (err) {
           console.error(err);
@@ -100,6 +118,74 @@ router.route('/movies')
           res.status(500).json({ success: false, message: 'Error saving movie' });
       }
     });
+
+router.get('/movies/:id([0-9a-fA-F]{24})', authJwtController.isAuthenticated, async (req, res) => {
+  try {
+    const aggregate = [
+      {
+        $match: { _id: new mongoose.Types.ObjectId(req.params.id) }
+      },
+      {
+        $lookup: {
+          from: 'reviews',
+          localField: '_id',
+          foreignField: 'movieId',
+          as: 'movieReviews'
+        }
+      },
+      {
+        $addFields: {
+          avgRating: { $avg: '$movieReviews.rating' }
+        }
+      }
+    ];
+
+    const movies = await Movie.aggregate(aggregate);
+    if (movies.length === 0) {
+      return res.status(404).json({ success: false, message: 'Movie not found' });
+    }
+    res.json(movies[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error retrieving movie' });
+  }
+});
+
+router.post('/movies/search', authJwtController.isAuthenticated, async (req, res) => {
+  const { query } = req.body;
+
+  try {
+    const aggregate = [
+      {
+        $match: {
+          $or: [
+            { title: { $regex: query, $options: 'i' } },
+            { 'actors.actorName': { $regex: query, $options: 'i' } }
+          ]
+        }
+      },
+      {
+        $lookup: {
+          from: 'reviews',
+          localField: '_id',
+          foreignField: 'movieId',
+          as: 'movieReviews'
+        }
+      },
+      {
+        $addFields: {
+          avgRating: { $avg: '$movieReviews.rating' }
+        }
+      }
+    ];
+
+    const movies = await Movie.aggregate(aggregate);
+    res.json(movies);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+});
 
 router.get('/movies/:title', authJwtController.isAuthenticated, async (req, res) => {
   try {
@@ -153,14 +239,20 @@ router.put('/movies/:title', authJwtController.isAuthenticated, async (req, res)
   }
 });
 
-router.get('/reviews', async (req, res) => {
-  const reviews = await Review.find();
-  res.json(reviews);
+router.get('/reviews', authJwtController.isAuthenticated, async (req, res) => {
+  try {
+    const reviews = await Review.find();
+    res.json(reviews);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error retrieving reviews' });
+  }
 });
 
 router.post('/reviews', authJwtController.isAuthenticated, async (req, res) => {
   try {
-    const { movieId, username, review, rating } = req.body;
+    const { movieId, review, rating } = req.body;
+    const username = req.user.username;
 
     if (!movieId || !review || rating === undefined) {
       return res.status(400).json({ message: 'Missing fields' });
@@ -174,14 +266,13 @@ router.post('/reviews', authJwtController.isAuthenticated, async (req, res) => {
     const newReview = new Review({ movieId, username, review, rating });
     await newReview.save();
 
-    res.json({ message: 'Review created!' });
+    res.json({ success: true, message: 'Review created!', review: newReview });
 
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Error creating review' });
   }
 });
-
 app.use('/', router);
 
 const PORT = process.env.PORT || 8080; // Define PORT before using it
