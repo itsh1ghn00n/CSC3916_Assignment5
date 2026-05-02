@@ -161,7 +161,7 @@ router.post('/movies/search', authJwtController.isAuthenticated, async (req, res
           $or: [
             { title: { $regex: search, $options: 'i' } },
             { 'actors.actorName': { $regex: search, $options: 'i' } },
-            { genre: { $regex: search, $options: 'i' } }
+            { genre: search }
           ]
         }
       },
