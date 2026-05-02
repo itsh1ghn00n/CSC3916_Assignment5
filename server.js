@@ -174,7 +174,7 @@ router.post('/movies/search', authJwtController.isAuthenticated, async (req, res
       },
       {
         $addFields: {
-          avgRating: { $avg: '$movieReviews.rating' }
+          avgRating: { $round: [{ $avg: '$movieReviews.rating' }, 1] }
         }
       }
     ];
@@ -276,7 +276,7 @@ router.get('/reviews', authJwtController.isAuthenticated, async (req, res) => {
 router.post('/reviews', authJwtController.isAuthenticated, async (req, res) => {
   try {
     const { movieId, review, rating } = req.body;
-    const username = req.user.username;
+    const username = req.user?.username || req.body.username
 
     if (!movieId || !review || rating === undefined) {
       return res.status(400).json({ message: 'Missing fields' });
